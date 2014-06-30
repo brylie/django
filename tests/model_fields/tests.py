@@ -42,7 +42,7 @@ class BasicFieldTests(test.TestCase):
         form_field = model_field.formfield(show_hidden_initial=False)
         self.assertFalse(form_field.show_hidden_initial)
 
-    def test_nullbooleanfield_blank(self):
+    def test_NullBooleanField_blank(self):
         """
         Regression test for #13071: NullBooleanField should not throw
         a validation error when given a value of None.
@@ -170,7 +170,7 @@ class ForeignKeyTests(test.TestCase):
         self.assertEqual(b.a, a)
 
     @test.skipIfDBFeature('interprets_empty_strings_as_nulls')
-    def test_empty_string_fk(self):
+    def test_empty_string_FK(self):
         """
         Test that foreign key values to empty strings don't get converted
         to None (#19299)
@@ -182,7 +182,7 @@ class ForeignKeyTests(test.TestCase):
 
 
 class DateTimeFieldTests(unittest.TestCase):
-    def test_datetimefield_to_python_usecs(self):
+    def test_DateTimeField_to_python_usecs(self):
         """DateTimeField.to_python should support usecs"""
         f = models.DateTimeField()
         self.assertEqual(f.to_python('2001-01-02 03:04:05.000006'),
@@ -190,7 +190,7 @@ class DateTimeFieldTests(unittest.TestCase):
         self.assertEqual(f.to_python('2001-01-02 03:04:05.999999'),
                          datetime.datetime(2001, 1, 2, 3, 4, 5, 999999))
 
-    def test_timefield_to_python_usecs(self):
+    def test_TimeField_to_python_usecs(self):
         """TimeField.to_python should support usecs"""
         f = models.TimeField()
         self.assertEqual(f.to_python('01:02:03.000004'),
@@ -212,7 +212,7 @@ class DateTimeFieldTests(unittest.TestCase):
 
 
 class BooleanFieldTests(unittest.TestCase):
-    def _test_get_db_prep_lookup(self, f):
+    def test_get_db_prep_lookup(self, f):
         self.assertEqual(f.get_db_prep_lookup('exact', True, connection=connection), [True])
         self.assertEqual(f.get_db_prep_lookup('exact', '1', connection=connection), [True])
         self.assertEqual(f.get_db_prep_lookup('exact', 1, connection=connection), [True])
@@ -221,23 +221,23 @@ class BooleanFieldTests(unittest.TestCase):
         self.assertEqual(f.get_db_prep_lookup('exact', 0, connection=connection), [False])
         self.assertEqual(f.get_db_prep_lookup('exact', None, connection=connection), [None])
 
-    def _test_to_python(self, f):
+    def test_to_python(self, f):
         self.assertTrue(f.to_python(1) is True)
         self.assertTrue(f.to_python(0) is False)
 
-    def test_booleanfield_get_db_prep_lookup(self):
+    def test_BooleanField_get_db_prep_lookup(self):
         self._test_get_db_prep_lookup(models.BooleanField())
 
-    def test_nullbooleanfield_get_db_prep_lookup(self):
+    def test_NullBooleanField_get_db_prep_lookup(self):
         self._test_get_db_prep_lookup(models.NullBooleanField())
 
-    def test_booleanfield_to_python(self):
+    def test_BooleanField_to_python(self):
         self._test_to_python(models.BooleanField())
 
-    def test_nullbooleanfield_to_python(self):
+    def test_NullBooleanField_to_python(self):
         self._test_to_python(models.NullBooleanField())
 
-    def test_charfield_textfield_max_length_passed_to_formfield(self):
+    def test_CharField_TextField_max_length_passed_to_formfield(self):
         """
         Test that CharField and TextField pass their max_length attributes to
         form fields created using their .formfield() method (#22206).
@@ -252,7 +252,7 @@ class BooleanFieldTests(unittest.TestCase):
         self.assertIsNone(tf1.formfield().max_length)
         self.assertEqual(2345, tf2.formfield().max_length)
 
-    def test_booleanfield_choices_blank(self):
+    def test_BooleanField_choices_blank(self):
         """
         Test that BooleanField with choices and defaults doesn't generate a
         formfield with the blank option (#9640, #10549).
@@ -377,7 +377,7 @@ class ChoicesTests(test.TestCase):
 
 
 class SlugFieldTests(test.TestCase):
-    def test_slugfield_max_length(self):
+    def test_SlugField_max_length(self):
         """
         Make sure SlugField honors max_length (#9706)
         """
@@ -387,32 +387,32 @@ class SlugFieldTests(test.TestCase):
 
 
 class ValidationTest(test.TestCase):
-    def test_charfield_raises_error_on_empty_string(self):
+    def test_CharField_raises_error_on_empty_string(self):
         f = models.CharField()
         self.assertRaises(ValidationError, f.clean, "", None)
 
-    def test_charfield_cleans_empty_string_when_blank_true(self):
+    def test_CharField_cleans_empty_string_when_blank_true(self):
         f = models.CharField(blank=True)
         self.assertEqual('', f.clean('', None))
 
-    def test_integerfield_cleans_valid_string(self):
+    def test_IntegerField_cleans_valid_string(self):
         f = models.IntegerField()
         self.assertEqual(2, f.clean('2', None))
 
-    def test_integerfield_raises_error_on_invalid_intput(self):
+    def test_IntegerField_raises_error_on_invalid_intput(self):
         f = models.IntegerField()
         self.assertRaises(ValidationError, f.clean, "a", None)
 
-    def test_charfield_with_choices_cleans_valid_choice(self):
+    def test_CharField_with_choices_cleans_valid_choice(self):
         f = models.CharField(max_length=1,
                              choices=[('a', 'A'), ('b', 'B')])
         self.assertEqual('a', f.clean('a', None))
 
-    def test_charfield_with_choices_raises_error_on_invalid_choice(self):
+    def test_CharField_with_choices_raises_error_on_invalid_choice(self):
         f = models.CharField(choices=[('a', 'A'), ('b', 'B')])
         self.assertRaises(ValidationError, f.clean, "not a", None)
 
-    def test_charfield_get_choices_with_blank_defined(self):
+    def test_CharField_get_choices_with_blank_defined(self):
         f = models.CharField(choices=[('', '<><>'), ('a', 'A')])
         self.assertEqual(f.get_choices(True), [('', '<><>'), ('a', 'A')])
 
@@ -421,32 +421,32 @@ class ValidationTest(test.TestCase):
             choices=(('group', ((10, 'A'), (20, 'B'))), (30, 'C')))
         self.assertEqual(10, f.clean(10, None))
 
-    def test_nullable_integerfield_raises_error_with_blank_false(self):
+    def test_nullable_IntegerField_raises_error_with_blank_false(self):
         f = models.IntegerField(null=True, blank=False)
         self.assertRaises(ValidationError, f.clean, None, None)
 
-    def test_nullable_integerfield_cleans_none_on_null_and_blank_true(self):
+    def test_nullable_IntegerField_cleans_none_on_null_and_blank_true(self):
         f = models.IntegerField(null=True, blank=True)
         self.assertEqual(None, f.clean(None, None))
 
-    def test_integerfield_raises_error_on_empty_input(self):
+    def test_IntegerField_raises_error_on_empty_input(self):
         f = models.IntegerField(null=False)
         self.assertRaises(ValidationError, f.clean, None, None)
         self.assertRaises(ValidationError, f.clean, '', None)
 
-    def test_integerfield_validates_zero_against_choices(self):
+    def test_IntegerField_validates_zero_against_choices(self):
         f = models.IntegerField(choices=((1, 1),))
         self.assertRaises(ValidationError, f.clean, '0', None)
 
-    def test_charfield_raises_error_on_empty_input(self):
+    def test_CharField_raises_error_on_empty_input(self):
         f = models.CharField(null=False)
         self.assertRaises(ValidationError, f.clean, None, None)
 
-    def test_datefield_cleans_date(self):
+    def test_DateField_cleans_date(self):
         f = models.DateField()
         self.assertEqual(datetime.date(2008, 10, 10), f.clean('2008-10-10', None))
 
-    def test_boolean_field_doesnt_accept_empty_input(self):
+    def test_BooleanField_does_not_accept_empty_input(self):
         f = models.BooleanField()
         self.assertRaises(ValidationError, f.clean, None, None)
 
@@ -546,10 +546,10 @@ class TypeCoercionTests(test.TestCase):
     automatic casting at the DB level. See #10015.
 
     """
-    def test_lookup_integer_in_charfield(self):
+    def test_lookup_integer_in_CharField(self):
         self.assertEqual(Post.objects.filter(title=9).count(), 0)
 
-    def test_lookup_integer_in_textfield(self):
+    def test_lookup_integer_in_TextField(self):
         self.assertEqual(Post.objects.filter(body=24).count(), 0)
 
 
@@ -626,7 +626,7 @@ class BinaryFieldTests(test.TestCase):
 
 
 class GenericIPAddressFieldTests(test.TestCase):
-    def test_genericipaddressfield_formfield_protocol(self):
+    def test_GenericIPAddressField_formfield_protocol(self):
         """
         Test that GenericIPAddressField with a specified protocol does not
         generate a formfield with no specified protocol. See #20740.
